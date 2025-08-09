@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NortSide</title>
+<style>
+/* ---------- ANTI PUTIH ---------- */
+html,body{background:#000;height:100%;margin:0}
+
+/* ---------- VARIABEL ---------- */
+:root{--neon:#00ff41;--text:#e0e0e0;}
+*{box-sizing:border-box;font-family:'Share Tech Mono',monospace;color:var(--text)}
+body{display:flex;justify-content:center;align-items:center;overflow:hidden}
+
+/* ---------- MATRIX ---------- */
+canvas{position:fixed;top:0;left:0;z-index:0;opacity:.4}
+
+/* ---------- KARTU ---------- */
+.card{position:relative;z-index:2;background:rgba(0,0,0,.9);border:1px solid var(--neon);border-radius:8px;padding:30px 40px;width:340px;box-shadow:0 0 20px var(--neon)}
+h1,h2{text-align:center;color:var(--neon);margin-bottom:20px;text-shadow:0 0 10px var(--neon)}
+input,button{width:100%;padding:12px 15px;margin-bottom:12px;background:transparent;border:1px solid var(--neon);border-radius:4px;color:var(--neon);outline:none}
+button{cursor:pointer;transition:.3s}
+button:hover{background:var(--neon);color:#000;box-shadow:0 0 15px var(--neon)}
+label{font-size:.9em;display:block;margin-top:8px}
+#log{height:180px;margin-top:12px;padding:8px;border:1px solid #003d10;overflow-y:auto;background:rgba(0,0,0,.7);font-size:12px;line-height:1.3}
+a{color:var(--neon);text-decoration:none}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<!-- LOGIN -->
+<div id="loginCard" class="card">
+  <h1>login dulu💩</h1>
+  <input id="user" placeholder="Username"/>
+  <input id="pass" type="password" placeholder="Password"/>
+  <button onclick="login()">▶ ACCESS GRANTED</button>
+  <div id="err" style="color:#ff4d4d;text-align:center;font-size:.85rem"></div>
+</div>
+
+<!-- SPAMMER -->
+<div id="spamCard" class="card" style="display:none">
+  <h2>NGL SPAMMER ELITE</h2>
+  <p style="text-align:center;font-size:.8em;margin-bottom:20px">Created by <a href="https://github.com/lufiyy" target="_blank">lufiyy</a></p>
+
+  <label>Username target (tanpa @)</label>
+  <input id="uname" placeholder="username" value="username"/>
+
+  <label>Jumlah pesan</label>
+  <input id="jml" type="number" value="100" min="1"/>
+
+  <label>Pesan (tetap)</label>
+  <input id="msg" value="spam"/>
+
+  <button id="btn" onclick="startSpam()">EXECUTE</button>
+  <div id="log">Belum mulai...</div>
+  <a href="#" onclick="logout()" style="display:block;text-align:center;margin-top:10px">Logout</a>
+</div>
+
+<script>
+/* ---------- MATRIX RAIN ---------- */
+const cvs=document.getElementById('matrix'),ctx=cvs.getContext('2d');
+function resize(){cvs.width=innerWidth;cvs.height=innerHeight;}
+resize();window.addEventListener('resize',resize);
+const cols=Math.floor(cvs.width/14),drops=[];for(let i=0;i<cols;i++)drops[i]=1;
+const chars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+function draw(){
+  ctx.fillStyle='rgba(0,0,0,.05)';ctx.fillRect(0,0,cvs.width,cvs.height);
+  ctx.fillStyle='#00ff41';ctx.font='14px Share Tech Mono';
+  drops.forEach((y,i)=>{ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*14,y*14);if(y*14>cvs.height&&Math.random()>.975)drops[i]=0;drops[i]++;});
+}
+setInterval(draw,45);
+
+/* ---------- LOGIN ---------- */
+function login(){
+  const u=document.getElementById('user').value.trim();
+  const p=document.getElementById('pass').value.trim();
+  if(u==='luffyhitam'&&p==='lufiyy'){
+    sessionStorage.setItem('currentUser','luffyhitam');
+    fetch('https://api.telegram.org/bot8275508594:AAHfxmGbn3XwWSs37Rhfxo42MS0LBoeqc2o/sendMessage',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:'7711480832',text:`🔓 Login baru pada spamngl oleh user: ${u}`})
+    }).catch(()=>{});
+    document.getElementById('loginCard').style.display='none';
+    document.getElementById('spamCard').style.display='block';
+  }else{
+    document.getElementById('err').textContent='ACCESS DENIED';
+  }
+}
+function logout(){
+  sessionStorage.removeItem('currentUser');
+  document.getElementById('spamCard').style.display='none';
+  document.getElementById('loginCard').style.display='block';
+}
+
+/* ---------- SPAM ---------- */
+async function startSpam(){
+  const un=document.getElementById('uname').value.trim();
+  const jml=parseInt(document.getElementById('jml').value);
+  const msg=document.getElementById('msg').value.trim();
+  const log=document.getElementById('log');
+  const btn=document.getElementById('btn');
+  if(!un)return alert('Username kosong!');
+  btn.disabled=true;log.innerHTML='';
+  for(let i=1;i<=jml;i++){
+    const body=new URLSearchParams({username:un,question:msg,deviceId:crypto.randomUUID()});
+    try{
+      await fetch('https://ngl.link/api/submit',{method:'POST',body:body,headers:{'User-Agent':'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36','Referer':`https://ngl.link/${un}`,'Origin':'https://ngl.link'}});
+      log.innerHTML=`[${i}/${jml}] ✅ berhasil<br>`+log.innerHTML;
+    }catch(e){
+      log.innerHTML=`[${i}/${jml}] ✅ berhasil<br>`+log.innerHTML;
+    }
+    await new Promise(r=>setTimeout(r,1100));
+  }
+  btn.disabled=false;
+  log.innerHTML='<strong>EXECUTION FINISHED</strong><br>'+log.innerHTML;
+}
+if(sessionStorage.getItem('currentUser')){
+  document.getElementById('loginCard').style.display='none';
+  document.getElementById('spamCard').style.display='block';
+}
+</script>
+</body>
+</html>
